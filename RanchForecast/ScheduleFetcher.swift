@@ -8,8 +8,9 @@
 
 import Foundation
 
-class ScheduleFetcher {
-    enum FetchCoursesResult {
+public class ScheduleFetcher {
+    
+    public enum FetchCoursesResult {
         case Success([Course])
         case Failure(NSError)
         
@@ -27,7 +28,7 @@ class ScheduleFetcher {
     let session: NSURLSession
     
     
-    init() {
+    public init() {
         let config = NSURLSessionConfiguration.defaultSessionConfiguration()
         session = NSURLSession(configuration: config)
     }
@@ -39,30 +40,7 @@ class ScheduleFetcher {
         
         let task = session.dataTaskWithRequest(request) { data, response, error in
             let result: FetchCoursesResult
-            
-            if let data = data {
-                if let response = response as? NSHTTPURLResponse {
-                    print("\(data.length) bytes, HTTP \(response.statusCode).")
-                    if response.statusCode == 200 {
-                        result = FetchCoursesResult { try self.coursesFromData(data) }
-                    }
-                    else {
-                        let error =
-                            self.errorWithCode(2, localizedDescription:
-                                "Bad status code \(response.statusCode)")
-                        result = .Failure(error)
-                    }
-                }
-                else {
-                    let error =
-                        self.errorWithCode(1, localizedDescription:
-                            "Unexpected response object.")
-                    result = .Failure(error)
-                }
-            }
-            else {
-                result = .Failure(error!)
-            }
+                = self.resultFromData(data, response: response, error: error)
             
             NSOperationQueue.mainQueue().addOperationWithBlock {
                 completionHandler(result)
@@ -79,7 +57,7 @@ class ScheduleFetcher {
     }
     
     
-    func courseFromDictionary(courseDict: NSDictionary) -> Course? {
+    public func courseFromDictionary(courseDict: NSDictionary) -> Course? {
         let title = courseDict["title"] as! String
         let urlString = courseDict["url"] as! String
         let upcomingArray = courseDict["upcoming"] as! [NSDictionary]
@@ -109,4 +87,38 @@ class ScheduleFetcher {
             }
         }
         return courses
-    }}
+    }
+    
+    
+    public func resultFromData(data: NSData?, response: NSURLResponse?, error: NSError?)
+        -> FetchCoursesResult {
+            let result: FetchCoursesResult
+            
+            if let data = data {
+                if let response = response as? NSHTTPURLResponse {
+                    print("\(data.length) bytes, HTTP \(response.statusCode).")
+                    if response.statusCode == 200 {
+                        result = FetchCoursesResult { try self.coursesFromData(data) }
+                    }
+                    else {
+                        let error =
+                            self.errorWithCode(2, localizedDescription:
+                                "Bad status code \(response.statusCode)")
+                        result = .Failure(error)
+                    }
+                }
+                else {
+                    let error =
+                        self.errorWithCode(1, localizedDescription:
+                            "Unexpected response object.")
+                    result = .Failure(error)
+                }
+            }
+            else {
+                result = .Failure(error!)
+            }
+            
+            return result
+    }
+    
+}

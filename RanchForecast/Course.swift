@@ -8,13 +8,13 @@
 
 import Foundation
 
-class Course: NSObject {
+public class Course: NSObject {
     
-    let title: String
-    let url: NSURL
-    let nextStartDate: NSDate
+    public let title: String
+    public let url: NSURL
+    public let nextStartDate: NSDate
     
-    init(title: String, url: NSURL, nextStartDate: NSDate) {
+    public init(title: String, url: NSURL, nextStartDate: NSDate) {
         self.title = title
         self.url = url
         self.nextStartDate = nextStartDate
